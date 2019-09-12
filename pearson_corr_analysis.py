@@ -1,13 +1,10 @@
 import os
+import time
 import numpy as np
 import pandas as pd
 from scipy import stats
 from functools import partial
 from multiprocessing import Pool  
-
-# Pearson correlation computations without p-value
-def pearson_corr(x,y):
-    return stats.pearsonr(x,y)[0]
 
 static_file = 'AMD_features_binary.csv'
 dynamic_file = 'dataset200.csv'
@@ -47,11 +44,17 @@ dynamic_feature_values = []
 for column in dynamic_features:
     dynamic_feature_values.append(list(df_concat[column])) 
 
+print(f'INFO: Starting calculations.')
+start = time.time()
+n=1
 # Run pearson correlation
 for static_feature in static_features:
-    static_feature_values = df_concat[static_feature]
-    results = pool.map(partial(stats.pearsonr, x=static_feature_values), dynamic_feature_values)
+    print(f'INFO: Correlation Analysis feature {n} of {len(static_features)}.')
+    static_feature_values = list(df_concat[static_feature])
+    results = pool.map(partial(stats.pearsonr, y=static_feature_values), dynamic_feature_values)
     df_correlations.loc[dynamic_features, static_feature] = results
-
+    n += 1
+end = time.time()
+print(f'INFO: Calculations were completed in: {(end - start)/60} minutes.')
 # Write results to csv
-df_concat.to_csv('Feature_Correlations.csv', sep=',', encoding='utf-8')
+df_correlations.to_csv('Feature_Correlations.csv', sep=',', encoding='utf-8')
