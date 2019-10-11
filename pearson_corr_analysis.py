@@ -8,6 +8,9 @@ from functools import partial
 from multiprocessing import Pool 
 from help_functions import memory_optimize,memory_optimize2
 
+def filter_pearson(x,y):
+    return stats.pearsonr(x,y)[0]
+
 def calculate_pearson(max_div, n):
 
     static_file = 'AMD_features_binary.csv'
@@ -25,7 +28,7 @@ def calculate_pearson(max_div, n):
     if n == 1:
         columns = headers[:int(max_headers*n)]
     else:
-        columns = headers[int(max_headers*n-1):int(max_headers*n)]
+        columns = headers[int(max_headers*(n-1)):int(max_headers*n)]
 
     df_chunk = pd.read_csv(dynamic_file, engine='c', low_memory=False, chunksize=5000, usecols=['sample', 'variety'] + columns)
     chunk_list = []
@@ -75,9 +78,9 @@ def calculate_pearson(max_div, n):
     # Run pearson correlation
     for static_feature in static_features:
         static_feature_values = list(df_concat[static_feature])
-        results = pool.map(partial(stats.pearsonr, y=static_feature_values), dynamic_feature_values)
+        results = pool.map(partial(filter_pearson, y=static_feature_values), dynamic_feature_values)
         df_correlations.loc[dynamic_features, static_feature] = results
     end = time.time()
     print(f'INFO: Calculations were completed in: {(end - start)/60} minutes.')
     # Write results to csv
-    df_correlations.to_csv(f'Feature_Correlations{n}/{max_div}.csv', sep=',', encoding='utf-8')
+    df_correlations.to_csv(f'Feature_Correlations{n}_{max_div}.csv', sep=',', encoding='utf-8')
