@@ -16,7 +16,7 @@ def filter(filename, n_varieties):
     df_concat = pd.concat(chunk_list)
 
     # Drop all static features that is present in less than n varieties
-    with open('/home/viktor/correlation_analysis/static_feature_family_count.json') as json_file:
+    with open('/home/viktor/correlation_analysis/static_feature_count.json') as json_file:
         data = json.load(json_file)
     for key in data.keys():
         if data[key] < n_varieties:
@@ -33,34 +33,32 @@ def filter(filename, n_varieties):
     return list_of_tuples
 
 def main():
-    for n in range(1,11):
-        all_correlations = []
-        for i in range(1,11):
-            correlations = filter(f'Feature_Correlations{i}_10.csv', n)
-            all_correlations += correlations
-        all_correlations.sort(reverse=True , key=lambda tup: tup[1])
-        print(f'Variety Threshold: {n}')
-        print('\\begin{landscape}')
-        print('\\begin{table}[h]')
-        print('\\centering')
-        print('\\caption{Dynamic Static Correlation} \label{tab:corr_load}')
-        print('\\begin{tabular}{|p{14cm}|c|c|}')
-        print('\\hline')
-        print('\\multicolumn{3}{|c|}{\\textbf{load}} \\\\ \\hline')			
-        print('\\textbf{Dynamic Features} & \\textbf{Static Features} & \\textbf{Correlation}	\\\\ \hline')
-        i = 1
-        for pair in all_correlations[:30]:
-            dynamic_static = pair[0].split(':')
-            dynamic_static[0] = dynamic_static[0].replace('_','\\_')
-            dynamic_static[1] = dynamic_static[1].replace('_','\\_')
-            print(f'{dynamic_static[0]} & {dynamic_static[1]} & {"{:12.2f}".format(pair[1])} \\\\ \\hline')
-            i += 1
-        print('\\end{tabular}')
-        print('\\end{table}')
-        print('\\end{landscape}')
-    #with open('sorted_correlations.csv', 'w', newline='') as myfile:
-    #    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-    #    wr.writerow(all_correlations)
+    all_correlations = []
+    for i in range(1,11):
+        correlations = filter(f'Feature_Correlations{i}_10.csv', 1)
+        all_correlations += correlations
+    all_correlations.sort(reverse=True , key=lambda tup: tup[1])
+    print('\\begin{landscape}')
+    print('\\begin{table}[h]')
+    print('\\centering')
+    print('\\caption{Dynamic Static Correlation} \label{tab:corr_load}')
+    print('\\begin{tabular}{|p{14cm}|c|c|}')
+    print('\\hline')
+    print('\\multicolumn{3}{|c|}{\\textbf{load}} \\\\ \\hline')			
+    print('\\textbf{Dynamic Features} & \\textbf{Static Features} & \\textbf{Correlation}	\\\\ \hline')
+    i = 1
+    for pair in all_correlations[:25]:
+        dynamic_static = pair[0].split(':')
+        dynamic_static[0] = dynamic_static[0].replace('_','\\_')
+        dynamic_static[1] = dynamic_static[1].replace('_','\\_')
+        print(f'{dynamic_static[0]} & {dynamic_static[1]} & {"{:12.2f}".format(pair[1])} \\\\ \\hline')
+        i += 1
+    print('\\end{tabular}')
+    print('\\end{table}')
+    print('\\end{landscape}')
+#with open('sorted_correlations.csv', 'w', newline='') as myfile:
+#    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+#    wr.writerow(all_correlations)
 
 
 if __name__ == "__main__":
